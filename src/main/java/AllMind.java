@@ -33,6 +33,7 @@ public class AllMind {
 
         String exitMessage = "It appears that will be all. Goodbye.";
         String[] tasks = new String[MAX_TASKS];
+        Boolean[] taskIsMarkedChecks = new Boolean[MAX_TASKS];
         int taskCount = 0;
 
         System.out.println(horizontalLine);
@@ -52,9 +53,14 @@ public class AllMind {
 
             System.out.println(horizontalLine);
             if (command.equals("list")) {
-                printTasks(tasks, taskCount);
+                printTasks(tasks, taskIsMarkedChecks, taskCount);
+            } else if (command.startsWith("mark ")) {
+                markTask(command, tasks, taskIsMarkedChecks, taskCount);
+            } else if (command.startsWith("unmark ")) {
+                unmarkTask(command, tasks, taskIsMarkedChecks, taskCount);
             } else if (taskCount < MAX_TASKS) {
                 tasks[taskCount] = command;
+                taskIsMarkedChecks[taskCount] = false;
                 taskCount++;
                 System.out.println("added: " + command);
             } else {
@@ -68,11 +74,53 @@ public class AllMind {
      * Prints each saved task with a one-based number.
      *
      * @param tasks the array containing saved tasks
+     * @param taskIsMarkedChecks the completion status for each saved task
      * @param taskCount the number of saved tasks in the array
      */
-    private static void printTasks(String[] tasks, int taskCount) {
+    private static void printTasks(String[] tasks, Boolean[] taskIsMarkedChecks, int taskCount) {
         for (int i = 0; i < taskCount; i++) {
-            System.out.println((i + 1) + ". " + tasks[i]);
+            String status = Boolean.TRUE.equals(taskIsMarkedChecks[i]) ? "X" : " ";
+            System.out.println((i + 1) + ".[" + status + "] " + tasks[i]);
+        }
+    }
+
+    /** Marks the one-based task number supplied with a {@code mark} command as done. */
+    private static void markTask(String command, String[] tasks, Boolean[] taskIsMarkedChecks,
+                                 int taskCount) {
+        String taskNumberText = command.substring("mark ".length()).trim();
+        try {
+            int taskNumber = Integer.parseInt(taskNumberText);
+            if (taskNumber < 1 || taskNumber > taskCount) {
+                System.out.println("That task number does not exist.");
+                return;
+            }
+
+            int taskIndex = taskNumber - 1;
+            taskIsMarkedChecks[taskIndex] = true;
+            System.out.println("Affirmative. I have marked this task as done:");
+            System.out.println("  [X] " + tasks[taskIndex]);
+        } catch (NumberFormatException e) {
+            System.out.println("Please provide a valid task number.");
+        }
+    }
+
+    /** Reverses the done status of the one-based task number in a {@code unmark} command. */
+    private static void unmarkTask(String command, String[] tasks, Boolean[] taskIsMarkedChecks,
+                                   int taskCount) {
+        String taskNumberText = command.substring("unmark ".length()).trim();
+        try {
+            int taskNumber = Integer.parseInt(taskNumberText);
+            if (taskNumber < 1 || taskNumber > taskCount) {
+                System.out.println("That task number does not exist.");
+                return;
+            }
+
+            int taskIndex = taskNumber - 1;
+            taskIsMarkedChecks[taskIndex] = false;
+            System.out.println("Affirmative, I have marked this task as not done yet:");
+            System.out.println("  [ ] " + tasks[taskIndex]);
+        } catch (NumberFormatException e) {
+            System.out.println("Please provide a valid task number.");
         }
     }
 }
