@@ -41,8 +41,11 @@ public class AllMind {
         System.out.println(horizontalLine);
 
         Scanner scanner = new Scanner(System.in);
+
         while (scanner.hasNextLine()) {
+
             String command = scanner.nextLine();
+
             if (command.equals("bye")) {
                 System.out.println(horizontalLine);
                 System.out.println(exitMessage);
@@ -51,6 +54,7 @@ public class AllMind {
             }
 
             System.out.println(horizontalLine);
+            
             if (command.equals("list")) {
                 printTasks(tasks, taskCount);
             } else if (command.startsWith("mark ")) {
@@ -58,9 +62,16 @@ public class AllMind {
             } else if (command.startsWith("unmark ")) {
                 unmarkTask(command, tasks, taskCount);
             } else if (taskCount < MAX_TASKS) {
-                tasks[taskCount] = new Task(command);
-                taskCount++;
-                System.out.println("added: " + command);
+                Task task = createTask(command);
+                if (task == null) {
+                    System.out.println("I could not understand that task command.");
+                } else {
+                    tasks[taskCount] = task;
+                    taskCount++;
+                    System.out.println("Understood. Your task has been added:");
+                    System.out.println("  " + task);
+                    System.out.println("There are now " + taskCount + " tasks in the list.");
+                }
             } else {
                 System.out.println("Task list is full.");
             }
@@ -72,14 +83,48 @@ public class AllMind {
      * Prints each saved task with a one-based number.
      *
      * @param tasks the array containing saved tasks
-     * @param taskIsMarkedChecks the completion status for each saved task
      * @param taskCount the number of saved tasks in the array
      */
     private static void printTasks(Task[] tasks, int taskCount) {
+        System.out.println("The tasks in your list are as follows:");
         for (int i = 0; i < taskCount; i++) {
-            System.out.println((i + 1) + ".[" + tasks[i].getStatusIcon() + "] "
-                    + tasks[i].getDescription());
+            System.out.println((i + 1) + "." + tasks[i].toString());
         }
+    }
+
+    /** Creates the appropriate task subtype from a user's task command. */
+    private static Task createTask(String command) {
+        if (command.startsWith("todo ")) {
+            String description = command.substring("todo ".length()).trim();
+            return description.isEmpty() ? null : new ToDo(description);
+        }
+
+        if (command.startsWith("deadline ")) {
+            String details = command.substring("deadline ".length()).trim();
+            int byIndex = details.indexOf(" /by ");
+            if (byIndex <= 0 || byIndex + 5 >= details.length()) {
+                return null;
+            }
+            String description = details.substring(0, byIndex).trim();
+            String by = details.substring(byIndex + 5).trim();
+            return description.isEmpty() || by.isEmpty() ? null : new Deadline(description, by);
+        }
+
+        if (command.startsWith("event ")) {
+            String details = command.substring("event ".length()).trim();
+            int fromIndex = details.indexOf(" /from ");
+            int toIndex = details.indexOf(" /to ", fromIndex + 6);
+            if (fromIndex <= 0 || toIndex <= fromIndex + 6 || toIndex + 5 >= details.length()) {
+                return null;
+            }
+            String description = details.substring(0, fromIndex).trim();
+            String from = details.substring(fromIndex + 6, toIndex).trim();
+            String to = details.substring(toIndex + 5).trim();
+            return description.isEmpty() || from.isEmpty() || to.isEmpty()
+                    ? null : new Event(description, from, to);
+        }
+
+        return null;
     }
 
     /** Marks the one-based task number supplied with a {@code mark} command as done. */
@@ -95,7 +140,7 @@ public class AllMind {
             int taskIndex = taskNumber - 1;
             tasks[taskIndex].markAsDone();
             System.out.println("Affirmative. I have marked this task as done:");
-            System.out.println("  [X] " + tasks[taskIndex].getDescription());
+            System.out.println(tasks[taskIndex].toString());
         } catch (NumberFormatException e) {
             System.out.println("Please provide a valid task number.");
         }
@@ -114,7 +159,7 @@ public class AllMind {
             int taskIndex = taskNumber - 1;
             tasks[taskIndex].markAsNotDone();
             System.out.println("Affirmative, I have marked this task as not done yet:");
-            System.out.println("  [ ] " + tasks[taskIndex].getDescription());
+            System.out.println(tasks[taskIndex].toString());
         } catch (NumberFormatException e) {
             System.out.println("Please provide a valid task number.");
         }

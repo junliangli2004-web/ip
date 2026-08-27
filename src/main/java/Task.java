@@ -10,6 +10,11 @@ public class Task {
         this.description = description;
         this.isDone = false;
     }
+    @Override
+    public String toString() {
+        return "[" + this.getStatusIcon() + "] "
+            + this.getDescription();
+    }
 
     /** Marks this task as completed. */
     public void markAsDone() {
@@ -31,3 +36,4 @@ public class Task {
         return description;
     }
 }
+
