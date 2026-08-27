@@ -1,4 +1,14 @@
+import java.util.Scanner;
+
+/**
+ * Starts the ALLMIND command-line chatbot and processes user commands.
+ */
 public class AllMind {
+    /**
+     * Greets the user, echoes each entered command, and stops when the user enters {@code bye}.
+     *
+     * @param args command-line arguments; not used by this application
+     */
     public static void main(String[] args) {
         String banner =
                 "                                                                                      \n" +
@@ -24,8 +34,20 @@ public class AllMind {
         System.out.println(banner);
         System.out.println(welcomeMessage);
         System.out.println(horizontalLine);
-        
-        System.out.println(exitMessage);
-        System.out.println(horizontalLine);
+
+        Scanner scanner = new Scanner(System.in);
+        while (scanner.hasNextLine()) {
+            String command = scanner.nextLine();
+            System.out.println(horizontalLine);
+
+            if (command.equals("bye")) {
+                System.out.println(exitMessage);
+                System.out.println(horizontalLine);
+                break;
+            }
+
+            System.out.println(command);
+            System.out.println(horizontalLine);
+        }
     }
 }
