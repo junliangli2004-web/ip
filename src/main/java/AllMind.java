@@ -4,8 +4,11 @@ import java.util.Scanner;
  * Starts the ALLMIND command-line chatbot and processes user commands.
  */
 public class AllMind {
+    /** Maximum number of tasks kept during one run of the application. */
+    private static final int MAX_TASKS = 100;
+
     /**
-     * Greets the user, echoes each entered command, and stops when the user enters {@code bye}.
+     * Greets the user, stores entered tasks, and stops when the user enters {@code bye}.
      *
      * @param args command-line arguments; not used by this application
      */
@@ -29,6 +32,8 @@ public class AllMind {
                                 "Welcome back, User";
 
         String exitMessage = "It appears that will be all. Goodbye.";
+        String[] tasks = new String[MAX_TASKS];
+        int taskCount = 0;
 
         System.out.println(horizontalLine);
         System.out.println(banner);
@@ -38,16 +43,36 @@ public class AllMind {
         Scanner scanner = new Scanner(System.in);
         while (scanner.hasNextLine()) {
             String command = scanner.nextLine();
-            System.out.println(horizontalLine);
-
             if (command.equals("bye")) {
+                System.out.println(horizontalLine);
                 System.out.println(exitMessage);
                 System.out.println(horizontalLine);
                 break;
             }
 
-            System.out.println(command);
             System.out.println(horizontalLine);
+            if (command.equals("list")) {
+                printTasks(tasks, taskCount);
+            } else if (taskCount < MAX_TASKS) {
+                tasks[taskCount] = command;
+                taskCount++;
+                System.out.println("added: " + command);
+            } else {
+                System.out.println("Task list is full.");
+            }
+            System.out.println(horizontalLine);
+        }
+    }
+
+    /**
+     * Prints each saved task with a one-based number.
+     *
+     * @param tasks the array containing saved tasks
+     * @param taskCount the number of saved tasks in the array
+     */
+    private static void printTasks(String[] tasks, int taskCount) {
+        for (int i = 0; i < taskCount; i++) {
+            System.out.println((i + 1) + ". " + tasks[i]);
         }
     }
 }
