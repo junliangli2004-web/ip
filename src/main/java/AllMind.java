@@ -55,25 +55,25 @@ public class AllMind {
 
             System.out.println(horizontalLine);
             
-            if (command.equals("list")) {
-                printTasks(tasks, taskCount);
-            } else if (command.startsWith("mark ")) {
-                markTask(command, tasks, taskCount);
-            } else if (command.startsWith("unmark ")) {
-                unmarkTask(command, tasks, taskCount);
-            } else if (taskCount < MAX_TASKS) {
-                Task task = createTask(command);
-                if (task == null) {
-                    System.out.println("I could not understand that task command.");
-                } else {
+            try {
+                if (command.equals("list")) {
+                    printTasks(tasks, taskCount);
+                } else if (command.startsWith("mark ")) {
+                    markTask(command, tasks, taskCount);
+                } else if (command.startsWith("unmark ")) {
+                    unmarkTask(command, tasks, taskCount);
+                } else if (taskCount < MAX_TASKS) {
+                    Task task = createTask(command);
                     tasks[taskCount] = task;
                     taskCount++;
                     System.out.println("Understood. Your task has been added:");
                     System.out.println("  " + task);
                     System.out.println("There are now " + taskCount + " tasks in the list.");
+                } else {
+                    System.out.println("Task list is full.");
                 }
-            } else {
-                System.out.println("Task list is full.");
+            } catch (InvalidCommandException | MissingFieldException e) {
+                System.out.println(e.getMessage());
             }
             System.out.println(horizontalLine);
         }
@@ -93,21 +93,28 @@ public class AllMind {
     }
 
     /** Creates the appropriate task subtype from a user's task command. */
-    private static Task createTask(String command) {
+    private static Task createTask(String command)
+            throws InvalidCommandException, MissingFieldException {
         if (command.startsWith("todo ")) {
             String description = command.substring("todo ".length()).trim();
-            return description.isEmpty() ? null : new ToDo(description);
+            if (description.isEmpty()) {
+                throw new MissingFieldException("A todo task needs a description.");
+            }
+            return new ToDo(description);
         }
 
         if (command.startsWith("deadline ")) {
             String details = command.substring("deadline ".length()).trim();
             int byIndex = details.indexOf(" /by ");
             if (byIndex <= 0 || byIndex + 5 >= details.length()) {
-                return null;
+                throw new MissingFieldException("A deadline needs a description and a /by date.");
             }
             String description = details.substring(0, byIndex).trim();
             String by = details.substring(byIndex + 5).trim();
-            return description.isEmpty() || by.isEmpty() ? null : new Deadline(description, by);
+            if (description.isEmpty() || by.isEmpty()) {
+                throw new MissingFieldException("A deadline needs a description and a /by date.");
+            }
+            return new Deadline(description, by);
         }
 
         if (command.startsWith("event ")) {
@@ -115,20 +122,22 @@ public class AllMind {
             int fromIndex = details.indexOf(" /from ");
             int toIndex = details.indexOf(" /to ", fromIndex + 6);
             if (fromIndex <= 0 || toIndex <= fromIndex + 6 || toIndex + 5 >= details.length()) {
-                return null;
+                throw new MissingFieldException("An event needs a description, /from time, and /to time.");
             }
             String description = details.substring(0, fromIndex).trim();
             String from = details.substring(fromIndex + 6, toIndex).trim();
             String to = details.substring(toIndex + 5).trim();
-            return description.isEmpty() || from.isEmpty() || to.isEmpty()
-                    ? null : new Event(description, from, to);
+            if (description.isEmpty() || from.isEmpty() || to.isEmpty()) {
+                throw new MissingFieldException("An event needs a description, /from time, and /to time.");
+            }
+            return new Event(description, from, to);
         }
 
-        return null;
+        throw new InvalidCommandException("I could not understand that command.");
     }
 
     /** Marks the one-based task number supplied with a {@code mark} command as done. */
-    private static void markTask(String command, Task[] tasks, int taskCount) {
+    private static void markTask(String command, Task[] tasks, int taskCount) throws InvalidCommandException {
         String taskNumberText = command.substring("mark ".length()).trim();
         try {
             int taskNumber = Integer.parseInt(taskNumberText);
@@ -142,12 +151,12 @@ public class AllMind {
             System.out.println("Affirmative. I have marked this task as done:");
             System.out.println(tasks[taskIndex].toString());
         } catch (NumberFormatException e) {
-            System.out.println("Please provide a valid task number.");
+            throw new InvalidCommandException("Please provide a valid task number.");
         }
     }
 
     /** Reverses the done status of the one-based task number in a {@code unmark} command. */
-    private static void unmarkTask(String command, Task[] tasks, int taskCount) {
+    private static void unmarkTask(String command, Task[] tasks, int taskCount) throws InvalidCommandException {
         String taskNumberText = command.substring("unmark ".length()).trim();
         try {
             int taskNumber = Integer.parseInt(taskNumberText);
@@ -161,7 +170,7 @@ public class AllMind {
             System.out.println("Affirmative, I have marked this task as not done yet:");
             System.out.println(tasks[taskIndex].toString());
         } catch (NumberFormatException e) {
-            System.out.println("Please provide a valid task number.");
+            throw new InvalidCommandException("Please provide a valid task number.");
         }
     }
 }
