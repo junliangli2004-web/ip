@@ -1,11 +1,10 @@
+import java.util.ArrayList;
 import java.util.Scanner;
 
 /**
  * Starts the ALLMIND command-line chatbot and processes user commands.
  */
 public class AllMind {
-    /** Maximum number of tasks kept during one run of the application. */
-    private static final int MAX_TASKS = 100;
 
     /**
      * Greets the user, stores entered tasks, and stops when the user enters {@code bye}.
@@ -32,8 +31,7 @@ public class AllMind {
                                 "Welcome back, User";
 
         String exitMessage = "It appears that will be all. Goodbye.";
-        Task[] tasks = new Task[MAX_TASKS];
-        int taskCount = 0;
+        ArrayList<Task> tasks = new ArrayList<Task>();
 
         System.out.println(horizontalLine);
         System.out.println(banner);
@@ -57,20 +55,17 @@ public class AllMind {
             
             try {
                 if (command.equals("list")) {
-                    printTasks(tasks, taskCount);
+                    printTasks(tasks);
                 } else if (command.startsWith("mark ")) {
-                    markTask(command, tasks, taskCount);
+                    markTask(command, tasks);
                 } else if (command.startsWith("unmark ")) {
-                    unmarkTask(command, tasks, taskCount);
-                } else if (taskCount < MAX_TASKS) {
+                    unmarkTask(command, tasks);
+                } else {
                     Task task = createTask(command);
-                    tasks[taskCount] = task;
-                    taskCount++;
+                    tasks.add(task);
                     System.out.println("Understood. Your task has been added:");
                     System.out.println("  " + task);
-                    System.out.println("There are now " + taskCount + " tasks in the list.");
-                } else {
-                    System.out.println("Task list is full.");
+                    System.out.println("There are now " + tasks.size() + " tasks in the list.");
                 }
             } catch (InvalidCommandException | MissingFieldException e) {
                 System.out.println(e.getMessage());
@@ -82,13 +77,12 @@ public class AllMind {
     /**
      * Prints each saved task with a one-based number.
      *
-     * @param tasks the array containing saved tasks
-     * @param taskCount the number of saved tasks in the array
+     * @param tasks the list containing saved tasks
      */
-    private static void printTasks(Task[] tasks, int taskCount) {
+    private static void printTasks(ArrayList<Task> tasks) {
         System.out.println("The tasks in your list are as follows:");
-        for (int i = 0; i < taskCount; i++) {
-            System.out.println((i + 1) + "." + tasks[i].toString());
+        for (int i = 0; i < tasks.size(); i++) {
+            System.out.println((i + 1) + "." + tasks.get(i).toString());
         }
     }
 
@@ -137,38 +131,38 @@ public class AllMind {
     }
 
     /** Marks the one-based task number supplied with a {@code mark} command as done. */
-    private static void markTask(String command, Task[] tasks, int taskCount) throws InvalidCommandException {
+    private static void markTask(String command, ArrayList<Task> tasks) throws InvalidCommandException {
         String taskNumberText = command.substring("mark ".length()).trim();
         try {
             int taskNumber = Integer.parseInt(taskNumberText);
-            if (taskNumber < 1 || taskNumber > taskCount) {
+            if (taskNumber < 1 || taskNumber > tasks.size()) {
                 System.out.println("That task number does not exist.");
                 return;
             }
 
             int taskIndex = taskNumber - 1;
-            tasks[taskIndex].markAsDone();
+            tasks.get(taskIndex).markAsDone();
             System.out.println("Affirmative. I have marked this task as done:");
-            System.out.println(tasks[taskIndex].toString());
+            System.out.println(tasks.get(taskIndex).toString());
         } catch (NumberFormatException e) {
             throw new InvalidCommandException("Please provide a valid task number.");
         }
     }
 
     /** Reverses the done status of the one-based task number in a {@code unmark} command. */
-    private static void unmarkTask(String command, Task[] tasks, int taskCount) throws InvalidCommandException {
+    private static void unmarkTask(String command, ArrayList<Task> tasks) throws InvalidCommandException {
         String taskNumberText = command.substring("unmark ".length()).trim();
         try {
             int taskNumber = Integer.parseInt(taskNumberText);
-            if (taskNumber < 1 || taskNumber > taskCount) {
+            if (taskNumber < 1 || taskNumber > tasks.size()) {
                 System.out.println("That task number does not exist.");
                 return;
             }
 
             int taskIndex = taskNumber - 1;
-            tasks[taskIndex].markAsNotDone();
+            tasks.get(taskIndex).markAsNotDone();
             System.out.println("Affirmative, I have marked this task as not done yet:");
-            System.out.println(tasks[taskIndex].toString());
+            System.out.println(tasks.get(taskIndex).toString());
         } catch (NumberFormatException e) {
             throw new InvalidCommandException("Please provide a valid task number.");
         }
