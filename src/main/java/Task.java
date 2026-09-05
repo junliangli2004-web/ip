@@ -89,18 +89,22 @@ public class Task {
 
     /** Marks the one-based task number supplied with a {@code mark} command as done. */
     public static void markTask(String command, ArrayList<Task> tasks) throws InvalidCommandException {
-        updateTaskStatus(command, "mark ", tasks, true);
+        String prefix = "mark ";
+        int taskNumber = Integer.parseInt(command.substring(prefix.length()).trim());
+        updateTaskStatus(taskNumber, tasks, true);
     }
 
     /** Reverses the done status of the one-based task number in an {@code unmark} command. */
     public static void unmarkTask(String command, ArrayList<Task> tasks) throws InvalidCommandException {
-        updateTaskStatus(command, "unmark ", tasks, false);
+        String prefix = "unmark ";
+        int taskNumber = Integer.parseInt(command.substring(prefix.length()).trim());
+        updateTaskStatus(taskNumber, tasks, false);
     }
 
-    private static void updateTaskStatus(String command, String prefix, ArrayList<Task> tasks, boolean done)
+
+    private static void updateTaskStatus(int taskNumber, ArrayList<Task> tasks, boolean done)
             throws InvalidCommandException {
         try {
-            int taskNumber = Integer.parseInt(command.substring(prefix.length()).trim());
             if (taskNumber < 1 || taskNumber > tasks.size()) {
                 System.out.println("That task number does not exist.");
                 return;
