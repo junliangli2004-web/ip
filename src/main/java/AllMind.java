@@ -25,7 +25,10 @@ public class AllMind {
                         "                                                                                      \n" +
                         "                                                                                      ";
 
-        String horizontalLine = "________________________________________________________________________________________________________________________";
+
+        String underscore = "_";
+
+        String horizontalLine = underscore.repeat(100);
 
         String welcomeMessage = "This is ALLMIND, a primitive chatbot system. \n" +
                                 "Welcome back, User";
