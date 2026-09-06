@@ -89,18 +89,22 @@ public class Task {
 
     /** Marks the one-based task number supplied with a {@code mark} command as done. */
     public static void markTask(String command, ArrayList<Task> tasks) throws InvalidCommandException {
-        updateTaskStatus(command, "mark ", tasks, true);
+        String prefix = "mark ";
+        int taskNumber = Integer.parseInt(command.substring(prefix.length()).trim());
+        updateTaskStatus(taskNumber, tasks, true);
     }
 
     /** Reverses the done status of the one-based task number in an {@code unmark} command. */
     public static void unmarkTask(String command, ArrayList<Task> tasks) throws InvalidCommandException {
-        updateTaskStatus(command, "unmark ", tasks, false);
+        String prefix = "unmark ";
+        int taskNumber = Integer.parseInt(command.substring(prefix.length()).trim());
+        updateTaskStatus(taskNumber, tasks, false);
     }
 
-    private static void updateTaskStatus(String command, String prefix, ArrayList<Task> tasks, boolean done)
+    /** Handles task mark and unmark logic **/
+    private static void updateTaskStatus(int taskNumber, ArrayList<Task> tasks, boolean done)
             throws InvalidCommandException {
         try {
-            int taskNumber = Integer.parseInt(command.substring(prefix.length()).trim());
             if (taskNumber < 1 || taskNumber > tasks.size()) {
                 System.out.println("That task number does not exist.");
                 return;
@@ -134,5 +138,131 @@ public class Task {
         } catch (NumberFormatException e) {
             throw new InvalidCommandException("Please provide a valid task number.");
         }
+    }
+
+    /**
+     * Converts a task into a readable tab-separated file format.
+     */
+    public String toFileFormat() {
+        String status = isDone ? "1" : "0";
+
+        if (this instanceof ToDo) {
+            return String.join("\t",
+                    "TODO",
+                    status,
+                    escape(description));
+        }
+
+        if (this instanceof Deadline deadline) {
+            return String.join("\t",
+                    "DEADLINE",
+                    status,
+                    escape(description),
+                    escape(deadline.by));
+        }
+
+        if (this instanceof Event event) {
+            return String.join("\t",
+                    "EVENT",
+                    status,
+                    escape(description),
+                    escape(event.from),
+                    escape(event.to));
+        }
+
+        throw new IllegalArgumentException("Unknown task type.");
+    }
+
+    /**
+     * Creates a task from one line in the task file.
+     */
+    public static Task fromFileFormat(String line) {
+        String[] fields = line.split("\t", -1);
+
+        if (fields.length < 3) {
+            throw new IllegalArgumentException("Invalid task format.");
+        }
+
+        String type = fields[0];
+        boolean isDone = fields[1].equals("1");
+
+        Task task;
+
+        switch (type) {
+            case "TODO":
+                task = new ToDo(unescape(fields[2]));
+                break;
+
+            case "DEADLINE":
+                if (fields.length != 4) {
+                    throw new IllegalArgumentException("Invalid deadline format.");
+                }
+                task = new Deadline(
+                        unescape(fields[2]),
+                        unescape(fields[3])
+                );
+                break;
+
+            case "EVENT":
+                if (fields.length != 5) {
+                    throw new IllegalArgumentException("Invalid event format.");
+                }
+                task = new Event(
+                        unescape(fields[2]),
+                        unescape(fields[3]),
+                        unescape(fields[4])
+                );
+                break;
+
+            default:
+                throw new IllegalArgumentException("Unknown task type.");
+        }
+
+        if (isDone) {
+            task.markAsDone();
+        }
+
+        return task;
+    }
+
+    /**
+     * Escapes special characters before saving them to the file.
+     */
+    private static String escape(String value) {
+        return value
+                .replace("\\", "\\\\")
+                .replace("\t", "\\t")
+                .replace("\n", "\\n");
+    }
+
+    /**
+     * Restores special characters after reading them from the file.
+     */
+    private static String unescape(String value) {
+        StringBuilder result = new StringBuilder();
+        boolean escaping = false;
+
+        for (char character : value.toCharArray()) {
+            if (escaping) {
+                if (character == 't') {
+                    result.append('\t');
+                } else if (character == 'n') {
+                    result.append('\n');
+                } else {
+                    result.append(character);
+                }
+                escaping = false;
+            } else if (character == '\\') {
+                escaping = true;
+            } else {
+                result.append(character);
+            }
+        }
+
+        if (escaping) {
+            result.append('\\');
+        }
+
+        return result.toString();
     }
 }

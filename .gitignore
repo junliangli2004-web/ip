@@ -19,5 +19,10 @@ _temp/
 # Codex files
 /.codex/
 
+# Task save file
+tasks.txt
+
 /text-ui-test/ACTUAL.TXT
 text-ui-test/EXPECTED-UNIX.TXT
+
+
