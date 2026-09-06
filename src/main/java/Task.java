@@ -1,4 +1,6 @@
 import java.util.ArrayList;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 
 /** Represents a task entered by the user and whether it has been completed. */
 public class Task {
@@ -67,7 +69,7 @@ public class Task {
             if (description.isEmpty() || by.isEmpty()) {
                 throw new MissingFieldException("A deadline needs a description and a /by date.");
             }
-            return new Deadline(description, by);
+            return new Deadline(description, parseDateIfPresent(by));
         }
         if (command.startsWith("event ")) {
             String details = command.substring("event ".length()).trim();
@@ -82,7 +84,11 @@ public class Task {
             if (description.isEmpty() || from.isEmpty() || to.isEmpty()) {
                 throw new MissingFieldException("An event needs a description, /from time, and /to time.");
             }
-            return new Event(description, from, to);
+            return new Event(
+                    description,
+                    parseDateIfPresent(from),
+                    parseDateIfPresent(to)
+            );
         }
         throw new InvalidCommandException("I could not understand that command.");
     }
@@ -158,7 +164,8 @@ public class Task {
                     "DEADLINE",
                     status,
                     escape(description),
-                    escape(deadline.by));
+                    escape(valueForFile(deadline.by))
+            );
         }
 
         if (this instanceof Event event) {
@@ -166,8 +173,9 @@ public class Task {
                     "EVENT",
                     status,
                     escape(description),
-                    escape(event.from),
-                    escape(event.to));
+                    escape(valueForFile(event.from)),
+                    escape(valueForFile(event.to))
+            );
         }
 
         throw new IllegalArgumentException("Unknown task type.");
@@ -176,7 +184,7 @@ public class Task {
     /**
      * Creates a task from one line in the task file.
      */
-    public static Task fromFileFormat(String line) {
+    public static Task fromFileFormat(String line) throws InvalidCommandException {
         String[] fields = line.split("\t", -1);
 
         if (fields.length < 3) {
@@ -199,7 +207,7 @@ public class Task {
                 }
                 task = new Deadline(
                         unescape(fields[2]),
-                        unescape(fields[3])
+                        parseDateIfPresent(unescape(fields[3]))
                 );
                 break;
 
@@ -209,8 +217,8 @@ public class Task {
                 }
                 task = new Event(
                         unescape(fields[2]),
-                        unescape(fields[3]),
-                        unescape(fields[4])
+                        parseDateIfPresent(unescape(fields[3])),
+                        parseDateIfPresent(unescape(fields[4]))
                 );
                 break;
 
@@ -264,5 +272,29 @@ public class Task {
         }
 
         return result.toString();
+    }
+
+    /**
+     * Converts an ISO date into a LocalDate.
+     * Keeps non-date values, such as event times, as strings.
+     */
+    private static Object parseDateIfPresent(String value)
+            throws InvalidCommandException {
+        if (!value.matches("\\d{4}-\\d{2}-\\d{2}")) {
+            return value;
+        }
+
+        try {
+            return LocalDate.parse(value);
+        } catch (DateTimeParseException e) {
+            throw new InvalidCommandException("Please provide a valid date in yyyy-mm-dd format.");
+        }
+    }
+    /** Checks if value is a LocalDate object **/
+    private static String valueForFile(Object value) {
+        if (value instanceof LocalDate date) {
+            return date.toString();
+        }
+        return value.toString();
     }
 }
