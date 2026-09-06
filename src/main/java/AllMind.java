@@ -36,7 +36,7 @@ public class AllMind {
                     tasks.add(task);
                 }
             }
-        } catch (IOException | IllegalArgumentException e) {
+        } catch (IOException | IllegalArgumentException | InvalidCommandException e) {
             System.out.println("The task file could not be read.");
         }
 
