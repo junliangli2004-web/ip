@@ -37,7 +37,7 @@ test {
 }
 
 application {
-    mainClass = 'seedu.duke.Duke'
+    mainClass = 'allmind.AllMind'
 }
 
 jar {
@@ -48,7 +48,11 @@ jar {
 }
 
 shadowJar {
-    archiveFileName = 'duke.jar'
+    // Package the application and all runtime dependencies into one executable JAR.
+    archiveFileName = 'allmind.jar'
+    manifest {
+        attributes 'Main-Class': application.mainClass.get()
+    }
 }
 
 run {
