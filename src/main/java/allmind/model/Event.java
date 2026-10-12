@@ -5,13 +5,13 @@ import java.time.format.DateTimeFormatter;
 
 /** A task that occurs between two specific dates. */
 public class Event extends Task {
+    private static final DateTimeFormatter DISPLAY_FORMAT =
+            DateTimeFormatter.ofPattern("MMM dd yyyy");
+
     /** The date on which the event starts. */
     protected LocalDate from;
     /** The date on which the event ends. */
     protected LocalDate to;
-
-    private static final DateTimeFormatter DISPLAY_FORMAT =
-            DateTimeFormatter.ofPattern("MMM dd yyyy");
 
     /**
      * Creates a new {@code Event} object
