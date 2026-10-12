@@ -13,6 +13,7 @@ public class AllMind {
     public static void main(String[] args) {
         Ui ui = new Ui();
         Storage storage = new Storage("tasks.txt");
+        Parser parser = new Parser();
         TaskList tasks;
         try {
             tasks = new TaskList(storage.load());
@@ -46,7 +47,7 @@ public class AllMind {
                     tasks.deleteTask(command);
                     saveTasks(storage, tasks, ui);
                 } else {
-                    Task task = Task.createTask(command);
+                    Task task = parser.parseTask(command);
                     tasks.add(task);
                     saveTasks(storage, tasks, ui);
                     System.out.println("Understood. Your task has been added:");

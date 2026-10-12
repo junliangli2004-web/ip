@@ -39,51 +39,6 @@ public class Task {
         return description;
     }
 
-    /** Creates the appropriate task subtype from a user's task command. */
-    public static Task createTask(String command)
-            throws InvalidCommandException, MissingFieldException {
-        if (command.startsWith("todo ")) {
-            String description = command.substring("todo ".length()).trim();
-            if (description.isEmpty()) {
-                throw new MissingFieldException("A todo task needs a description.");
-            }
-            return new ToDo(description);
-        }
-        if (command.startsWith("deadline ")) {
-            String details = command.substring("deadline ".length()).trim();
-            int byIndex = details.indexOf(" /by ");
-            if (byIndex <= 0 || byIndex + 5 >= details.length()) {
-                throw new MissingFieldException("A deadline needs a description and a /by date.");
-            }
-            String description = details.substring(0, byIndex).trim();
-            String by = details.substring(byIndex + 5).trim();
-            if (description.isEmpty() || by.isEmpty()) {
-                throw new MissingFieldException("A deadline needs a description and a /by date.");
-            }
-            return new Deadline(description, parseDateIfPresent(by));
-        }
-        if (command.startsWith("event ")) {
-            String details = command.substring("event ".length()).trim();
-            int fromIndex = details.indexOf(" /from ");
-            int toIndex = details.indexOf(" /to ", fromIndex + 6);
-            if (fromIndex <= 0 || toIndex <= fromIndex + 6 || toIndex + 5 >= details.length()) {
-                throw new MissingFieldException("An event needs a description, /from date, and /to date.");
-            }
-            String description = details.substring(0, fromIndex).trim();
-            String from = details.substring(fromIndex + 6, toIndex).trim();
-            String to = details.substring(toIndex + 5).trim();
-            if (description.isEmpty() || from.isEmpty() || to.isEmpty()) {
-                throw new MissingFieldException("An event needs a description, /from date, and /to date.");
-            }
-            return new Event(
-                    description,
-                    parseDateIfPresent(from),
-                    parseDateIfPresent(to)
-            );
-        }
-        throw new InvalidCommandException("I could not understand that command.");
-    }
-
     /**
      * Converts a task into a readable tab-separated file format.
      */
