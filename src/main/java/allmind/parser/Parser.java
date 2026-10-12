@@ -84,24 +84,24 @@ public class Parser {
         }
         Task task;
         switch (fields[0]) {
-        case "TODO":
-            task = new ToDo(unescape(fields[2]));
-            break;
-        case "DEADLINE":
-            if (fields.length != 4) {
-                throw new IllegalArgumentException("Invalid deadline format.");
-            }
-            task = new Deadline(unescape(fields[2]), parseDate(unescape(fields[3])));
-            break;
-        case "EVENT":
-            if (fields.length != 5) {
-                throw new IllegalArgumentException("Invalid event format.");
-            }
-            task = new Event(unescape(fields[2]), parseDate(unescape(fields[3])),
-                    parseDate(unescape(fields[4])));
-            break;
-        default:
-            throw new IllegalArgumentException("Unknown task type.");
+            case "TODO":
+                task = new ToDo(unescape(fields[2]));
+                break;
+            case "DEADLINE":
+                if (fields.length != 4) {
+                    throw new IllegalArgumentException("Invalid deadline format.");
+                }
+                task = new Deadline(unescape(fields[2]), parseDate(unescape(fields[3])));
+                break;
+            case "EVENT":
+                if (fields.length != 5) {
+                    throw new IllegalArgumentException("Invalid event format.");
+                }
+                task = new Event(unescape(fields[2]), parseDate(unescape(fields[3])),
+                        parseDate(unescape(fields[4])));
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown task type.");
         }
         if (fields[1].equals("1")) {
             task.markAsDone();

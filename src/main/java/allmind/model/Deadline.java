@@ -6,11 +6,11 @@ import java.time.format.DateTimeFormatter;
 /** A task that must be completed by a specific date. */
 public class Deadline extends Task {
 
-    /** The deadline date, stored as a strongly typed LocalDate. */
-    protected LocalDate by;
-
     private static final DateTimeFormatter DISPLAY_FORMAT =
             DateTimeFormatter.ofPattern("MMM dd yyyy");
+
+    /** The deadline date, stored as a strongly typed LocalDate. */
+    protected LocalDate by;
 
     /**
      * Creates a new {@code Deadline} object
