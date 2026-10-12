@@ -1,4 +1,3 @@
-import java.util.ArrayList;
 import java.io.IOException;
 
 /**
@@ -14,12 +13,12 @@ public class AllMind {
     public static void main(String[] args) {
         Ui ui = new Ui();
         Storage storage = new Storage("tasks.txt");
-        ArrayList<Task> tasks;
+        TaskList tasks;
         try {
-            tasks = storage.load();
+            tasks = new TaskList(storage.load());
         } catch (IOException | IllegalArgumentException | InvalidCommandException e) {
             ui.showLoadingError();
-            tasks = new ArrayList<>();
+            tasks = new TaskList();
         }
 
         ui.showWelcome();
@@ -36,15 +35,15 @@ public class AllMind {
             
             try {
                 if (command.equals("list")) {
-                    Task.printTasks(tasks);
+                    tasks.printTasks();
                 } else if (command.startsWith("mark ")) {
-                    Task.markTask(command, tasks);
+                    tasks.markTask(command);
                     saveTasks(storage, tasks, ui);
                 } else if (command.startsWith("unmark ")) {
-                    Task.unmarkTask(command, tasks);
+                    tasks.unmarkTask(command);
                     saveTasks(storage, tasks, ui);
                 } else if (command.startsWith("delete ")) {
-                    Task.deleteTask(command, tasks);
+                    tasks.deleteTask(command);
                     saveTasks(storage, tasks, ui);
                 } else {
                     Task task = Task.createTask(command);
@@ -62,9 +61,9 @@ public class AllMind {
     }
 
     /** Saves tasks and reports file errors through the UI. */
-    private static void saveTasks(Storage storage, ArrayList<Task> tasks, Ui ui) {
+    private static void saveTasks(Storage storage, TaskList tasks, Ui ui) {
         try {
-            storage.save(tasks);
+            storage.save(tasks.asArrayList());
         } catch (IOException | IllegalArgumentException e) {
             ui.showSavingError();
         }
