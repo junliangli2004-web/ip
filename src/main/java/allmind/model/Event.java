@@ -13,6 +13,7 @@ public class Event extends Task {
     private static final DateTimeFormatter DISPLAY_FORMAT =
             DateTimeFormatter.ofPattern("MMM dd yyyy");
 
+    /** Creates an event task with the supplied description and date range. */
     public Event(String description, LocalDate from, LocalDate to) {
         super(description);
         this.from = from;
