@@ -1,6 +1,7 @@
 package allmind.model;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 import allmind.parser.InvalidCommandException;
 
@@ -33,6 +34,23 @@ public class TaskList {
         System.out.println("The tasks in your list are as follows:");
         for (int i = 0; i < tasks.size(); i++) {
             System.out.println((i + 1) + "." + tasks.get(i));
+        }
+    }
+
+    /** Prints tasks whose descriptions contain the keyword, ignoring letter case. */
+    public void findTasks(String command) throws InvalidCommandException {
+        String keyword = command.substring("find ".length()).trim();
+        if (keyword.isEmpty()) {
+            throw new InvalidCommandException("Please provide a keyword to search for.");
+        }
+
+        String lowercaseKeyword = keyword.toLowerCase(Locale.ROOT);
+        System.out.println("Here are the matching tasks in your list:");
+        for (int i = 0; i < tasks.size(); i++) {
+            Task task = tasks.get(i);
+            if (task.getDescription().toLowerCase(Locale.ROOT).contains(lowercaseKeyword)) {
+                System.out.println((i + 1) + "." + task);
+            }
         }
     }
 
