@@ -1,5 +1,6 @@
 package allmind.model;
 
+/** A task without a deadline or event date range. */
 public class ToDo extends Task {
 
     /**
