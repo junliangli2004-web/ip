@@ -47,6 +47,8 @@ public class AllMind {
             try {
                 if (command.equals("list")) {
                     tasks.printTasks();
+                } else if (command.equals("find") || command.startsWith("find ")) {
+                    tasks.findTasks(command);
                 } else if (command.startsWith("mark ")) {
                     tasks.markTask(command);
                     saveTasks(storage, tasks, parser, ui);
