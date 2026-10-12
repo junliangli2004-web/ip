@@ -1,3 +1,5 @@
+package allmind.model;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
@@ -13,6 +15,11 @@ public class Deadline extends Task {
     public Deadline(String description, LocalDate by) {
         super(description);
         this.by = by;
+    }
+
+    /** Returns the date by which this task must be completed. */
+    public LocalDate getBy() {
+        return by;
     }
 
     @Override

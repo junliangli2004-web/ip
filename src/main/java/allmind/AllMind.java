@@ -1,4 +1,14 @@
+package allmind;
+
 import java.io.IOException;
+
+import allmind.model.Task;
+import allmind.model.TaskList;
+import allmind.parser.InvalidCommandException;
+import allmind.parser.MissingFieldException;
+import allmind.parser.Parser;
+import allmind.storage.Storage;
+import allmind.ui.Ui;
 
 /**
  * Starts the ALLMIND command-line chatbot and processes user commands.

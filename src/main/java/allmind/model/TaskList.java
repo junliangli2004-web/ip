@@ -1,4 +1,8 @@
+package allmind.model;
+
 import java.util.ArrayList;
+
+import allmind.parser.InvalidCommandException;
 
 /** Owns the application's collection of tasks and its task operations. */
 public class TaskList {
