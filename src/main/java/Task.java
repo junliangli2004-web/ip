@@ -1,4 +1,3 @@
-import java.util.ArrayList;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 
@@ -38,14 +37,6 @@ public class Task {
     /** Returns this task's description. */
     public String getDescription() {
         return description;
-    }
-
-    /** Prints each saved task with a one-based number. */
-    public static void printTasks(ArrayList<Task> tasks) {
-        System.out.println("The tasks in your list are as follows:");
-        for (int i = 0; i < tasks.size(); i++) {
-            System.out.println((i + 1) + "." + tasks.get(i));
-        }
     }
 
     /** Creates the appropriate task subtype from a user's task command. */
@@ -91,59 +82,6 @@ public class Task {
             );
         }
         throw new InvalidCommandException("I could not understand that command.");
-    }
-
-    /** Marks the one-based task number supplied with a {@code mark} command as done. */
-    public static void markTask(String command, ArrayList<Task> tasks) throws InvalidCommandException {
-        String prefix = "mark ";
-        int taskNumber = Integer.parseInt(command.substring(prefix.length()).trim());
-        updateTaskStatus(taskNumber, tasks, true);
-    }
-
-    /** Reverses the done status of the one-based task number in an {@code unmark} command. */
-    public static void unmarkTask(String command, ArrayList<Task> tasks) throws InvalidCommandException {
-        String prefix = "unmark ";
-        int taskNumber = Integer.parseInt(command.substring(prefix.length()).trim());
-        updateTaskStatus(taskNumber, tasks, false);
-    }
-
-    /** Handles task mark and unmark logic **/
-    private static void updateTaskStatus(int taskNumber, ArrayList<Task> tasks, boolean done)
-            throws InvalidCommandException {
-        try {
-            if (taskNumber < 1 || taskNumber > tasks.size()) {
-                System.out.println("That task number does not exist.");
-                return;
-            }
-            Task task = tasks.get(taskNumber - 1);
-            if (done) {
-                task.markAsDone();
-                System.out.println("Affirmative. I have marked this task as done:");
-            } else {
-                task.markAsNotDone();
-                System.out.println("Affirmative, I have marked this task as not done yet:");
-            }
-            System.out.println(task);
-        } catch (NumberFormatException e) {
-            throw new InvalidCommandException("Please provide a valid task number.");
-        }
-    }
-
-    /** Deletes the one-based task number supplied with a {@code delete} command. */
-    public static void deleteTask(String command, ArrayList<Task> tasks) throws InvalidCommandException {
-        try {
-            int taskNumber = Integer.parseInt(command.substring("delete ".length()).trim());
-            if (taskNumber < 1 || taskNumber > tasks.size()) {
-                System.out.println("That task number does not exist.");
-                return;
-            }
-            Task deletedTask = tasks.remove(taskNumber - 1);
-            System.out.println("Noted. I've removed this task:");
-            System.out.println("  " + deletedTask);
-            System.out.println("Now you have " + tasks.size() + " tasks in the list.");
-        } catch (NumberFormatException e) {
-            throw new InvalidCommandException("Please provide a valid task number.");
-        }
     }
 
     /**
