@@ -1,65 +1,9 @@
-import java.util.ArrayList;
-import java.util.Scanner;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 /**
  * Starts the ALLMIND command-line chatbot and processes user commands.
  */
 public class AllMind {
-
-    private static final Path TASK_FILE = Paths.get("tasks.txt");
-
-    /**
-     * Loads all tasks from the task file.
-     * Creates an empty file if it does not already exist.
-     */
-    private static ArrayList<Task> loadTasks() {
-        ArrayList<Task> tasks = new ArrayList<>();
-
-        try {
-            if (Files.notExists(TASK_FILE)) {
-                Files.createFile(TASK_FILE);
-                return tasks;
-            }
-
-            List<String> lines = Files.readAllLines(TASK_FILE);
-
-            for (String line : lines) {
-                if (!line.isBlank()) {
-                    Task task = Task.fromFileFormat(line);
-                    tasks.add(task);
-                }
-            }
-        } catch (IOException | IllegalArgumentException | InvalidCommandException e) {
-            System.out.println("The task file could not be read.");
-        }
-
-        return tasks;
-    }
-
-    /**
-     * Writes the current task list to the task file.
-     */
-    private static void saveTasks(ArrayList<Task> tasks) {
-        try {
-            List<String> lines = tasks.stream()
-                    .map(Task::toFileFormat)
-                    .collect(Collectors.toList());
-
-            Files.write(
-                    TASK_FILE,
-                    lines
-            );
-        } catch (IOException e) {
-            System.out.println("The task file could not be saved.");
-        }
-    }
 
     /**
      * Greets the user, stores entered tasks, and stops when the user enters {@code bye}.
@@ -67,67 +11,45 @@ public class AllMind {
      * @param args command-line arguments; not used by this application
      */
     public static void main(String[] args) {
-        String banner =
-                "                                                                                      \n" +
-                        "                                                                                      \n" +
-                        "      db      `7MMF'      `7MMF'      `7MMM.     ,MMF'`7MMF'`7MN.   `7MF'`7MM\"\"\"Yb.   \n" +
-                        "     ;MM:       MM          MM          MMMb    dPMM    MM    MMN.    M    MM    `Yb. \n" +
-                        "    ,V^MM.      MM          MM          M YM   ,M MM    MM    M YMb   M    MM     `Mb \n" +
-                        "   ,M  `MM      MM          MM          M  Mb  M' MM    MM    M  `MN. M    MM      MM \n" +
-                        "   AbmmmqMA     MM      ,   MM      ,   M  YM.P'  MM    MM    M   `MM.M    MM     ,MP \n" +
-                        "  A'     VML    MM     ,M   MM     ,M   M  `YM'   MM    MM    M     YMM    MM    ,dP' \n" +
-                        ".AMA.   .AMMA..JMMmmmmMMM .JMMmmmmMMM .JML. `'  .JMML..JMML..JML.    YM  .JMMmmmdP'   \n" +
-                        "                                                                                      \n" +
-                        "                                                                                      ";
+        Ui ui = new Ui();
+        Storage storage = new Storage("tasks.txt");
+        Parser parser = new Parser();
+        TaskList tasks;
+        try {
+            tasks = new TaskList(storage.load(parser));
+        } catch (IOException | IllegalArgumentException | InvalidCommandException e) {
+            ui.showLoadingError();
+            tasks = new TaskList();
+        }
 
+        ui.showWelcome();
 
-        String underscore = "_";
-
-        String horizontalLine = underscore.repeat(100);
-
-        String welcomeMessage = "This is ALLMIND, a primitive chatbot system. \n" +
-                                "Welcome back, User";
-
-        String exitMessage = "It appears that will be all. Goodbye.";
-
-        ArrayList<Task> tasks = loadTasks();
-
-        System.out.println(horizontalLine);
-        System.out.println(banner);
-        System.out.println(welcomeMessage);
-        System.out.println(horizontalLine);
-
-        Scanner scanner = new Scanner(System.in);
-
-        while (scanner.hasNextLine()) {
-
-            String command = scanner.nextLine();
+        String command;
+        while ((command = ui.readCommand()) != null) {
 
             if (command.equals("bye")) {
-                System.out.println(horizontalLine);
-                System.out.println(exitMessage);
-                System.out.println(horizontalLine);
+                ui.showGoodbye();
                 break;
             }
 
-            System.out.println(horizontalLine);
+            ui.showLine();
             
             try {
                 if (command.equals("list")) {
-                    Task.printTasks(tasks);
+                    tasks.printTasks();
                 } else if (command.startsWith("mark ")) {
-                    Task.markTask(command, tasks);
-                    saveTasks(tasks);
+                    tasks.markTask(command);
+                    saveTasks(storage, tasks, parser, ui);
                 } else if (command.startsWith("unmark ")) {
-                    Task.unmarkTask(command, tasks);
-                    saveTasks(tasks);
+                    tasks.unmarkTask(command);
+                    saveTasks(storage, tasks, parser, ui);
                 } else if (command.startsWith("delete ")) {
-                    Task.deleteTask(command, tasks);
-                    saveTasks(tasks);
+                    tasks.deleteTask(command);
+                    saveTasks(storage, tasks, parser, ui);
                 } else {
-                    Task task = Task.createTask(command);
+                    Task task = parser.parseTask(command);
                     tasks.add(task);
-                    saveTasks(tasks);
+                    saveTasks(storage, tasks, parser, ui);
                     System.out.println("Understood. Your task has been added:");
                     System.out.println("  " + task);
                     System.out.println("There are now " + tasks.size() + " tasks in the list.");
@@ -135,7 +57,16 @@ public class AllMind {
             } catch (InvalidCommandException | MissingFieldException e) {
                 System.out.println(e.getMessage());
             }
-            System.out.println(horizontalLine);
+            ui.showLine();
+        }
+    }
+
+    /** Saves tasks and reports file errors through the UI. */
+    private static void saveTasks(Storage storage, TaskList tasks, Parser parser, Ui ui) {
+        try {
+            storage.save(tasks.asArrayList(), parser);
+        } catch (IOException | IllegalArgumentException e) {
+            ui.showSavingError();
         }
     }
 

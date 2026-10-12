@@ -1,23 +1,23 @@
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
+/** A task that must be completed by a specific date. */
 public class Deadline extends Task {
 
-    protected Object by; // LocalDate when yyyy-MM-dd, otherwise String
+    /** The deadline date, stored as a strongly typed LocalDate. */
+    protected LocalDate by;
 
     private static final DateTimeFormatter DISPLAY_FORMAT =
             DateTimeFormatter.ofPattern("MMM dd yyyy");
 
-    public Deadline(String description, Object by) {
+    public Deadline(String description, LocalDate by) {
         super(description);
         this.by = by;
     }
 
     @Override
     public String toString() {
-        String displayedDate = by instanceof LocalDate
-                ? ((LocalDate) by).format(DISPLAY_FORMAT)
-                : by.toString();
+        String displayedDate = by.format(DISPLAY_FORMAT);
 
         return "[D]" + super.toString() + " (by: " + displayedDate + ")";
     }

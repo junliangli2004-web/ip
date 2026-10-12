@@ -1,23 +1,24 @@
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
+/** A task that occurs between two specific dates. */
 public class Event extends Task {
-    protected Object from;
-    protected Object to;
+    /** The date on which the event starts. */
+    protected LocalDate from;
+    /** The date on which the event ends. */
+    protected LocalDate to;
 
     private static final DateTimeFormatter DISPLAY_FORMAT =
             DateTimeFormatter.ofPattern("MMM dd yyyy");
 
-    public Event(String description, Object from, Object to) {
+    public Event(String description, LocalDate from, LocalDate to) {
         super(description);
         this.from = from;
         this.to = to;
     }
 
-    private String formatDate(Object value) {
-        return value instanceof LocalDate
-                ? ((LocalDate) value).format(DISPLAY_FORMAT)
-                : value.toString();
+    private String formatDate(LocalDate value) {
+        return value.format(DISPLAY_FORMAT);
     }
 
     @Override
