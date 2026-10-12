@@ -18,7 +18,7 @@ public class Storage {
      * Loads all non-empty task records from the file.
      * Creates an empty file when the file does not exist.
      */
-    public ArrayList<Task> load() throws IOException, InvalidCommandException {
+    public ArrayList<Task> load(Parser parser) throws IOException, InvalidCommandException {
         ArrayList<Task> tasks = new ArrayList<>();
 
         if (Files.notExists(taskFile)) {
@@ -29,16 +29,16 @@ public class Storage {
         List<String> lines = Files.readAllLines(taskFile);
         for (String line : lines) {
             if (!line.isBlank()) {
-                tasks.add(Task.fromFileFormat(line));
+                tasks.add(parser.fromFileFormat(line));
             }
         }
         return tasks;
     }
 
     /** Saves every task in the list using the task file format. */
-    public void save(ArrayList<Task> tasks) throws IOException {
+    public void save(ArrayList<Task> tasks, Parser parser) throws IOException {
         List<String> lines = tasks.stream()
-                .map(Task::toFileFormat)
+                .map(parser::toFileFormat)
                 .collect(Collectors.toList());
         Files.write(taskFile, lines);
     }

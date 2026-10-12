@@ -16,7 +16,7 @@ public class AllMind {
         Parser parser = new Parser();
         TaskList tasks;
         try {
-            tasks = new TaskList(storage.load());
+            tasks = new TaskList(storage.load(parser));
         } catch (IOException | IllegalArgumentException | InvalidCommandException e) {
             ui.showLoadingError();
             tasks = new TaskList();
@@ -39,17 +39,17 @@ public class AllMind {
                     tasks.printTasks();
                 } else if (command.startsWith("mark ")) {
                     tasks.markTask(command);
-                    saveTasks(storage, tasks, ui);
+                    saveTasks(storage, tasks, parser, ui);
                 } else if (command.startsWith("unmark ")) {
                     tasks.unmarkTask(command);
-                    saveTasks(storage, tasks, ui);
+                    saveTasks(storage, tasks, parser, ui);
                 } else if (command.startsWith("delete ")) {
                     tasks.deleteTask(command);
-                    saveTasks(storage, tasks, ui);
+                    saveTasks(storage, tasks, parser, ui);
                 } else {
                     Task task = parser.parseTask(command);
                     tasks.add(task);
-                    saveTasks(storage, tasks, ui);
+                    saveTasks(storage, tasks, parser, ui);
                     System.out.println("Understood. Your task has been added:");
                     System.out.println("  " + task);
                     System.out.println("There are now " + tasks.size() + " tasks in the list.");
@@ -62,9 +62,9 @@ public class AllMind {
     }
 
     /** Saves tasks and reports file errors through the UI. */
-    private static void saveTasks(Storage storage, TaskList tasks, Ui ui) {
+    private static void saveTasks(Storage storage, TaskList tasks, Parser parser, Ui ui) {
         try {
-            storage.save(tasks.asArrayList());
+            storage.save(tasks.asArrayList(), parser);
         } catch (IOException | IllegalArgumentException e) {
             ui.showSavingError();
         }

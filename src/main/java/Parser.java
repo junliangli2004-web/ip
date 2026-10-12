@@ -51,4 +51,79 @@ public class Parser {
             throw new InvalidCommandException("Please provide a valid date in yyyy-mm-dd format.");
         }
     }
+
+    /** Converts a task into the tab-separated format used by task storage. */
+    public String toFileFormat(Task task) {
+        String status = task.isDone ? "1" : "0";
+        if (task instanceof ToDo) {
+            return String.join("\t", "TODO", status, escape(task.getDescription()));
+        }
+        if (task instanceof Deadline deadline) {
+            return String.join("\t", "DEADLINE", status, escape(task.getDescription()),
+                    escape(deadline.by.toString()));
+        }
+        if (task instanceof Event event) {
+            return String.join("\t", "EVENT", status, escape(task.getDescription()),
+                    escape(event.from.toString()), escape(event.to.toString()));
+        }
+        throw new IllegalArgumentException("Unknown task type.");
+    }
+
+    /** Creates a task from one line in the task file. */
+    public Task fromFileFormat(String line) throws InvalidCommandException {
+        String[] fields = line.split("\t", -1);
+        if (fields.length < 3) {
+            throw new IllegalArgumentException("Invalid task format.");
+        }
+        Task task;
+        switch (fields[0]) {
+        case "TODO":
+            task = new ToDo(unescape(fields[2]));
+            break;
+        case "DEADLINE":
+            if (fields.length != 4) {
+                throw new IllegalArgumentException("Invalid deadline format.");
+            }
+            task = new Deadline(unescape(fields[2]), parseDate(unescape(fields[3])));
+            break;
+        case "EVENT":
+            if (fields.length != 5) {
+                throw new IllegalArgumentException("Invalid event format.");
+            }
+            task = new Event(unescape(fields[2]), parseDate(unescape(fields[3])),
+                    parseDate(unescape(fields[4])));
+            break;
+        default:
+            throw new IllegalArgumentException("Unknown task type.");
+        }
+        if (fields[1].equals("1")) {
+            task.markAsDone();
+        }
+        return task;
+    }
+
+    /** Escapes special characters before saving a task. */
+    private String escape(String value) {
+        return value.replace("\\", "\\\\").replace("\t", "\\t").replace("\n", "\\n");
+    }
+
+    /** Restores special characters after reading a task. */
+    private String unescape(String value) {
+        StringBuilder result = new StringBuilder();
+        boolean escaping = false;
+        for (char character : value.toCharArray()) {
+            if (escaping) {
+                result.append(character == 't' ? '\t' : character == 'n' ? '\n' : character);
+                escaping = false;
+            } else if (character == '\\') {
+                escaping = true;
+            } else {
+                result.append(character);
+            }
+        }
+        if (escaping) {
+            result.append('\\');
+        }
+        return result.toString();
+    }
 }
