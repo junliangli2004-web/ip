@@ -1,3 +1,5 @@
+package allmind.ui;
+
 import java.util.Scanner;
 
 /** Handles console input and output for the ALLMIND chatbot. */

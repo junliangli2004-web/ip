@@ -1,4 +1,4 @@
-import java.time.LocalDate;
+package allmind.model;
 
 /** Represents a task entered by the user and whether it has been completed. */
 public class Task {
@@ -36,6 +36,11 @@ public class Task {
     /** Returns this task's description. */
     public String getDescription() {
         return description;
+    }
+
+    /** Returns whether this task has been completed. */
+    public boolean isDone() {
+        return isDone;
     }
 
 }

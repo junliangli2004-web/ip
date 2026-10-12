@@ -1,5 +1,12 @@
+package allmind.parser;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
+
+import allmind.model.Deadline;
+import allmind.model.Event;
+import allmind.model.Task;
+import allmind.model.ToDo;
 
 /** Converts user commands that create tasks into task objects. */
 public class Parser {
@@ -54,17 +61,17 @@ public class Parser {
 
     /** Converts a task into the tab-separated format used by task storage. */
     public String toFileFormat(Task task) {
-        String status = task.isDone ? "1" : "0";
+        String status = task.isDone() ? "1" : "0";
         if (task instanceof ToDo) {
             return String.join("\t", "TODO", status, escape(task.getDescription()));
         }
         if (task instanceof Deadline deadline) {
             return String.join("\t", "DEADLINE", status, escape(task.getDescription()),
-                    escape(deadline.by.toString()));
+                    escape(deadline.getBy().toString()));
         }
         if (task instanceof Event event) {
             return String.join("\t", "EVENT", status, escape(task.getDescription()),
-                    escape(event.from.toString()), escape(event.to.toString()));
+                    escape(event.getFrom().toString()), escape(event.getTo().toString()));
         }
         throw new IllegalArgumentException("Unknown task type.");
     }
