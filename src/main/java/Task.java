@@ -76,13 +76,13 @@ public class Task {
             int fromIndex = details.indexOf(" /from ");
             int toIndex = details.indexOf(" /to ", fromIndex + 6);
             if (fromIndex <= 0 || toIndex <= fromIndex + 6 || toIndex + 5 >= details.length()) {
-                throw new MissingFieldException("An event needs a description, /from time, and /to time.");
+                throw new MissingFieldException("An event needs a description, /from date, and /to date.");
             }
             String description = details.substring(0, fromIndex).trim();
             String from = details.substring(fromIndex + 6, toIndex).trim();
             String to = details.substring(toIndex + 5).trim();
             if (description.isEmpty() || from.isEmpty() || to.isEmpty()) {
-                throw new MissingFieldException("An event needs a description, /from time, and /to time.");
+                throw new MissingFieldException("An event needs a description, /from date, and /to date.");
             }
             return new Event(
                     description,
@@ -274,27 +274,18 @@ public class Task {
         return result.toString();
     }
 
-    /**
-     * Converts an ISO date into a LocalDate.
-     * Keeps non-date values, such as event times, as strings.
-     */
-    private static Object parseDateIfPresent(String value)
+    /** Converts a user-supplied ISO date into a LocalDate. */
+    private static LocalDate parseDateIfPresent(String value)
             throws InvalidCommandException {
-        if (!value.matches("\\d{4}-\\d{2}-\\d{2}")) {
-            return value;
-        }
-
         try {
             return LocalDate.parse(value);
-        } catch (DateTimeParseException e) {
+        } catch (DateTimeParseException | NullPointerException e) {
             throw new InvalidCommandException("Please provide a valid date in yyyy-mm-dd format.");
         }
     }
-    /** Checks if value is a LocalDate object **/
-    private static String valueForFile(Object value) {
-        if (value instanceof LocalDate date) {
-            return date.toString();
-        }
+
+    /** Converts a LocalDate to its ISO representation for task storage. */
+    private static String valueForFile(LocalDate value) {
         return value.toString();
     }
 }
