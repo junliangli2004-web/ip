@@ -23,7 +23,7 @@ public class Task {
         isDone = true;
     }
 
-    /** Marks this task as unfinished again. */
+    /** Marks this task as incomplete. */
     public void markAsNotDone() {
         isDone = false;
     }

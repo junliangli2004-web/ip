@@ -18,7 +18,7 @@ public class TaskList {
         this.tasks = tasks;
     }
 
-    /** Returns the tasks for persistence. */
+    /** Returns the tasks as an ArrayList. */
     public ArrayList<Task> asArrayList() {
         return tasks;
     }
