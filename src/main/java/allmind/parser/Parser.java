@@ -78,6 +78,7 @@ public class Parser {
 
     /** Creates a task from one line in the task file. */
     public Task fromFileFormat(String line) throws InvalidCommandException {
+        assert line != null : "A task record must not be null";
         String[] fields = line.split("\t", -1);
         if (fields.length < 3) {
             throw new IllegalArgumentException("Invalid task format.");
@@ -103,6 +104,8 @@ public class Parser {
             default:
                 throw new IllegalArgumentException("Unknown task type.");
         }
+        assert fields[1].equals("0") || fields[1].equals("1")
+                : "A stored task must have a binary completion status";
         if (fields[1].equals("1")) {
             task.markAsDone();
         }
