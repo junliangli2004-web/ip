@@ -18,6 +18,8 @@ public class TaskList {
 
     /** Creates a task list containing the supplied tasks. */
     public TaskList(ArrayList<Task> tasks) {
+        assert tasks != null : "A task list must have a backing collection";
+        assert !tasks.contains(null) : "A task list cannot contain null tasks";
         this.tasks = tasks;
     }
 
@@ -28,6 +30,7 @@ public class TaskList {
 
     /** Adds a task to the list. */
     public void add(Task task) {
+        assert task != null : "A task list cannot contain null tasks";
         tasks.add(task);
     }
 
