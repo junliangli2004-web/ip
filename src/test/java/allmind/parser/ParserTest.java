@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.LocalDate;
 
@@ -81,5 +82,51 @@ public class ParserTest {
     @Test
     public void parseTask_unknownCommand_invalidCommandExceptionThrown() {
         assertThrows(InvalidCommandException.class, () -> parser.parseTask("set meeting"));
+    }
+
+    @Test
+    public void fileFormat_todoRoundTrip_preservesDescriptionAndStatus() throws Exception {
+        ToDo todo = new ToDo("read\\notes\tsoon\n");
+        todo.markAsDone();
+
+        Task restored = parser.fromFileFormat(parser.toFileFormat(todo));
+
+        assertEquals(todo.getDescription(), restored.getDescription());
+        assertTrue(restored.isDone());
+    }
+
+    @Test
+    public void fileFormat_deadlineAndEventRoundTrip_preservesDates() throws Exception {
+        Deadline deadline = new Deadline("submit", LocalDate.of(2026, 10, 20));
+        Event event = new Event("meeting", LocalDate.of(2026, 10, 21), LocalDate.of(2026, 10, 22));
+
+        Deadline restoredDeadline = (Deadline) parser.fromFileFormat(parser.toFileFormat(deadline));
+        Event restoredEvent = (Event) parser.fromFileFormat(parser.toFileFormat(event));
+
+        assertEquals(deadline.getBy(), restoredDeadline.getBy());
+        assertEquals(event.getFrom(), restoredEvent.getFrom());
+        assertEquals(event.getTo(), restoredEvent.getTo());
+    }
+
+    @Test
+    public void fromFileFormat_malformedRecord_illegalArgumentExceptionThrown() {
+        assertThrows(IllegalArgumentException.class, () -> parser.fromFileFormat("TODO\t0"));
+        assertThrows(IllegalArgumentException.class, () -> parser.fromFileFormat("UNKNOWN\t0\ttask"));
+        assertThrows(IllegalArgumentException.class, () -> parser.fromFileFormat("DEADLINE\t0\ttask"));
+        assertThrows(IllegalArgumentException.class, () -> parser.fromFileFormat("EVENT\t0\ttask\t2026-10-20"));
+    }
+
+    @Test
+    public void fromFileFormat_invalidDate_invalidCommandExceptionThrown() {
+        assertThrows(InvalidCommandException.class,
+                () -> parser.fromFileFormat("DEADLINE\t0\ttask\tnot-a-date"));
+    }
+
+    @Test
+    public void parseTask_missingDeadlineOrEventField_missingFieldExceptionThrown() {
+        assertThrows(MissingFieldException.class, () -> parser.parseTask("deadline task /by"));
+        assertThrows(MissingFieldException.class, () -> parser.parseTask("event meeting /from 2026-10-20"));
+        assertThrows(MissingFieldException.class,
+                () -> parser.parseTask("event meeting /from 2026-10-20 /to"));
     }
 }
