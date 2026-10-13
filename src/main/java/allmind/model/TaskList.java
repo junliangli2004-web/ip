@@ -1,6 +1,8 @@
 package allmind.model;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 
 import allmind.parser.InvalidCommandException;
@@ -19,9 +21,9 @@ public class TaskList {
         this.tasks = tasks;
     }
 
-    /** Returns the tasks as an ArrayList. */
-    public ArrayList<Task> asArrayList() {
-        return tasks;
+    /** Returns a read-only view of the tasks. */
+    public List<Task> asList() {
+        return Collections.unmodifiableList(tasks);
     }
 
     /** Adds a task to the list. */

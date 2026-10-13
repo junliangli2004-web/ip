@@ -100,8 +100,8 @@ public class AllMind {
                     return "There are no tasks in your list.";
                 }
                 StringBuilder response = new StringBuilder("The tasks in your list are as follows:\n");
-                for (int i = 0; i < tasks.asArrayList().size(); i++) {
-                    response.append(i + 1).append(". ").append(tasks.asArrayList().get(i)).append("\n");
+                for (int i = 0; i < tasks.asList().size(); i++) {
+                    response.append(i + 1).append(". ").append(tasks.asList().get(i)).append("\n");
                 }
                 return response.toString().trim();
             }
@@ -111,8 +111,8 @@ public class AllMind {
                     throw new InvalidCommandException("Please provide a keyword to search for.");
                 }
                 StringBuilder response = new StringBuilder("Here are the matching tasks in your list:\n");
-                for (int i = 0; i < tasks.asArrayList().size(); i++) {
-                    Task task = tasks.asArrayList().get(i);
+                for (int i = 0; i < tasks.asList().size(); i++) {
+                    Task task = tasks.asList().get(i);
                     if (task.getDescription().toLowerCase(Locale.ROOT).contains(keyword.toLowerCase(Locale.ROOT))) {
                         response.append(i + 1).append(". ").append(task).append("\n");
                     }
@@ -147,7 +147,7 @@ public class AllMind {
     /** Saves tasks and reports file errors through the UI. */
     private static void saveTasks(Storage storage, TaskList tasks, Parser parser, Ui ui) {
         try {
-            storage.save(tasks.asArrayList(), parser);
+            storage.save(tasks.asList(), parser);
         } catch (IOException | IllegalArgumentException e) {
             ui.showSavingError();
         }

@@ -42,7 +42,7 @@ public class Storage {
     }
 
     /** Saves every task in the list using the task file format. */
-    public void save(ArrayList<Task> tasks, Parser parser) throws IOException {
+    public void save(List<Task> tasks, Parser parser) throws IOException {
         List<String> lines = tasks.stream()
                 .map(parser::toFileFormat)
                 .collect(Collectors.toList());
