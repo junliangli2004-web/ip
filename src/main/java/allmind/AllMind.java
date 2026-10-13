@@ -140,15 +140,15 @@ public class AllMind {
                 }
                 if (input.trim().equalsIgnoreCase("no")) {
                     pendingEvent = null;
-                    return "The event was not added.";
+                    return "Understood. Your input was discarded.";
                 }
-                return "Please enter yes to add the event or no to cancel.";
+                return "Apologies, a 'yes' or 'no' answer is required.";
             }
             if (input.equals("list")) {
                 if (tasks.size() == 0) {
                     return "There are no tasks in your list.";
                 }
-                StringBuilder response = new StringBuilder("The tasks in your list are as follows:\n");
+                StringBuilder response = new StringBuilder("Affirmative. You have scheduled the following tasks:\n");
                 for (int i = 0; i < tasks.asList().size(); i++) {
                     response.append(i + 1).append(". ").append(tasks.asList().get(i)).append("\n");
                 }
@@ -157,9 +157,9 @@ public class AllMind {
             if (input.equals("find") || input.startsWith("find ")) {
                 String keyword = input.substring("find".length()).trim();
                 if (keyword.isEmpty()) {
-                    throw new InvalidCommandException("Please provide a keyword to search for.");
+                    throw new InvalidCommandException("You have not provided a keyword.");
                 }
-                StringBuilder response = new StringBuilder("Here are the matching tasks in your list:\n");
+                StringBuilder response = new StringBuilder("Searching...\n I have found these related tasks:\n");
                 for (int i = 0; i < tasks.asList().size(); i++) {
                     Task task = tasks.asList().get(i);
                     if (task.getDescription().toLowerCase(Locale.ROOT).contains(keyword.toLowerCase(Locale.ROOT))) {
@@ -171,17 +171,17 @@ public class AllMind {
             if (input.startsWith("mark ")) {
                 tasks.markTask(input);
                 saveTasks(storage, tasks, parser, new Ui());
-                return "Task marked as done.";
+                return "Affirmative. Task marked as done.";
             }
             if (input.startsWith("unmark ")) {
                 tasks.unmarkTask(input);
                 saveTasks(storage, tasks, parser, new Ui());
-                return "Task marked as not done.";
+                return "Affirmative. Task marked as not done.";
             }
             if (input.startsWith("delete ")) {
                 tasks.deleteTask(input);
                 saveTasks(storage, tasks, parser, new Ui());
-                return "Task deleted.";
+                return "Affirmative. Task deleted.";
             }
 
             Task task = parser.parseTask(input);
@@ -210,7 +210,7 @@ public class AllMind {
                     .append(conflict.overlapStart().format(CONFLICT_DATE_FORMAT)).append(" to ")
                     .append(conflict.overlapEnd().format(CONFLICT_DATE_FORMAT)).append(")");
         }
-        return response.append("\nAdd it anyway? Enter yes or no.").toString();
+        return response.append("\nAre you sure you want to add this event? (yes/no)").toString();
     }
 
     /** Saves tasks and reports file errors through the UI. */
