@@ -121,21 +121,21 @@ public class TaskList {
     }
 
     /** Updates the completion status of the task selected by a mark command. */
-    private void updateTaskStatus(String command, boolean done) throws InvalidCommandException {
+    private void updateTaskStatus(String command, boolean isDone) throws InvalidCommandException {
         try {
-            String prefix = done ? "mark " : "unmark ";
+            String prefix = isDone ? "mark " : "unmark ";
             int taskNumber = Integer.parseInt(command.substring(prefix.length()).trim());
             if (taskNumber < 1 || taskNumber > tasks.size()) {
                 System.out.println("That task number does not exist.");
                 return;
             }
             Task task = tasks.get(taskNumber - 1);
-            if (done) {
+            if (isDone) {
                 task.markAsDone();
-                System.out.println("Affirmative. I have marked this task as done:");
+                System.out.println("Affirmative. I have marked this task as isDone:");
             } else {
                 task.markAsNotDone();
-                System.out.println("Affirmative, I have marked this task as not done yet:");
+                System.out.println("Affirmative, I have marked this task as not isDone yet:");
             }
             System.out.println(task);
         } catch (NumberFormatException e) {

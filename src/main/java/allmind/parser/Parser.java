@@ -128,18 +128,18 @@ public class Parser {
     /** Restores special characters after reading a task. */
     private String unescape(String value) {
         StringBuilder result = new StringBuilder();
-        boolean escaping = false;
+        boolean isEscaping = false;
         for (char character : value.toCharArray()) {
-            if (escaping) {
+            if (isEscaping) {
                 result.append(character == 't' ? '\t' : character == 'n' ? '\n' : character);
-                escaping = false;
+                isEscaping = false;
             } else if (character == '\\') {
-                escaping = true;
+                isEscaping = true;
             } else {
                 result.append(character);
             }
         }
-        if (escaping) {
+        if (isEscaping) {
             result.append('\\');
         }
         return result.toString();
