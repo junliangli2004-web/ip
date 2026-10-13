@@ -73,6 +73,13 @@ public class AllMind {
         }
     }
 
+    /**
+     * Generates a response for the user's chat message.
+     */
+    public String getResponse(String input) {
+        return "AllMind heard: " + input;
+    }
+
     /** Saves tasks and reports file errors through the UI. */
     private static void saveTasks(Storage storage, TaskList tasks, Parser parser, Ui ui) {
         try {
