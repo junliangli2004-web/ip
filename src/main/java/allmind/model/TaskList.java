@@ -1,5 +1,6 @@
 package allmind.model;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -10,6 +11,11 @@ import allmind.parser.InvalidCommandException;
 /** Owns the application's collection of tasks and its task operations. */
 public class TaskList {
     private final ArrayList<Task> tasks;
+
+    /** Describes an unfinished event that overlaps a newly added event. */
+    public record EventConflict(int taskNumber, String description, LocalDate overlapStart,
+            LocalDate overlapEnd) {
+    }
 
     /** Creates an empty task list. */
     public TaskList() {
@@ -32,6 +38,29 @@ public class TaskList {
     public void add(Task task) {
         assert task != null : "A task list cannot contain null tasks";
         tasks.add(task);
+    }
+
+    /** Returns all unfinished events that overlap the supplied event, in list order. */
+    public List<EventConflict> findEventConflicts(Event newEvent) {
+        assert newEvent != null : "The event to check must not be null";
+
+        List<EventConflict> conflicts = new ArrayList<>();
+        for (int i = 0; i < tasks.size(); i++) {
+            Task task = tasks.get(i);
+            if (!(task instanceof Event existingEvent) || existingEvent.isDone()) {
+                continue;
+            }
+
+            LocalDate overlapStart = existingEvent.getFrom().isAfter(newEvent.getFrom())
+                    ? existingEvent.getFrom() : newEvent.getFrom();
+            LocalDate overlapEnd = existingEvent.getTo().isBefore(newEvent.getTo())
+                    ? existingEvent.getTo() : newEvent.getTo();
+            if (!overlapStart.isAfter(overlapEnd)) {
+                conflicts.add(new EventConflict(i + 1, existingEvent.getDescription(),
+                        overlapStart, overlapEnd));
+            }
+        }
+        return conflicts;
     }
 
     /** Prints all tasks with their one-based list numbers. */

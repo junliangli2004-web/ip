@@ -1,8 +1,11 @@
 package allmind;
 
 import java.io.IOException;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Locale;
 
+import allmind.model.Event;
 import allmind.model.Task;
 import allmind.model.TaskList;
 import allmind.parser.InvalidCommandException;
@@ -16,9 +19,13 @@ import allmind.ui.Ui;
  */
 public class AllMind {
 
+    private static final DateTimeFormatter CONFLICT_DATE_FORMAT =
+            DateTimeFormatter.ofPattern("MMM dd yyyy");
+
     private final Parser parser = new Parser();
     private final Storage storage = new Storage("tasks.txt");
     private TaskList tasks;
+    private Event pendingEvent;
 
     /** Creates an AllMind instance and loads its saved tasks. */
     public AllMind() {
@@ -49,6 +56,7 @@ public class AllMind {
         ui.showWelcome();
 
         String command;
+        Event pendingEvent = null;
         while ((command = ui.readCommand()) != null) {
 
             if (command.equals("bye")) {
@@ -59,6 +67,23 @@ public class AllMind {
             ui.showLine();
             
             try {
+                if (pendingEvent != null) {
+                    if (command.trim().equalsIgnoreCase("yes")) {
+                        tasks.add(pendingEvent);
+                        saveTasks(storage, tasks, parser, ui);
+                        System.out.println("Understood. Your task has been added:");
+                        System.out.println("  " + pendingEvent);
+                        System.out.println("There are now " + tasks.size() + " tasks in the list.");
+                        pendingEvent = null;
+                    } else if (command.trim().equalsIgnoreCase("no")) {
+                        System.out.println("The event was not added.");
+                        pendingEvent = null;
+                    } else {
+                        System.out.println("Please enter yes to add the event or no to cancel.");
+                    }
+                    ui.showLine();
+                    continue;
+                }
                 if (command.equals("list")) {
                     tasks.printTasks();
                 } else if (command.equals("find") || command.startsWith("find ")) {
@@ -74,6 +99,15 @@ public class AllMind {
                     saveTasks(storage, tasks, parser, ui);
                 } else {
                     Task task = parser.parseTask(command);
+                    if (task instanceof Event event) {
+                        List<TaskList.EventConflict> conflicts = tasks.findEventConflicts(event);
+                        if (!conflicts.isEmpty()) {
+                            System.out.println(formatConflictWarning(conflicts));
+                            pendingEvent = event;
+                            ui.showLine();
+                            continue;
+                        }
+                    }
                     tasks.add(task);
                     saveTasks(storage, tasks, parser, ui);
                     System.out.println("Understood. Your task has been added:");
@@ -93,7 +127,22 @@ public class AllMind {
     public String getResponse(String input) {
         try {
             if (input.equals("bye")) {
+                pendingEvent = null;
                 return "Goodbye!";
+            }
+            if (pendingEvent != null) {
+                if (input.trim().equalsIgnoreCase("yes")) {
+                    tasks.add(pendingEvent);
+                    saveTasks(storage, tasks, parser, new Ui());
+                    Task addedEvent = pendingEvent;
+                    pendingEvent = null;
+                    return "Understood. Your task has been added:\n  " + addedEvent;
+                }
+                if (input.trim().equalsIgnoreCase("no")) {
+                    pendingEvent = null;
+                    return "The event was not added.";
+                }
+                return "Please enter yes to add the event or no to cancel.";
             }
             if (input.equals("list")) {
                 if (tasks.size() == 0) {
@@ -136,12 +185,32 @@ public class AllMind {
             }
 
             Task task = parser.parseTask(input);
+            if (task instanceof Event event) {
+                List<TaskList.EventConflict> conflicts = tasks.findEventConflicts(event);
+                if (!conflicts.isEmpty()) {
+                    pendingEvent = event;
+                    return formatConflictWarning(conflicts);
+                }
+            }
             tasks.add(task);
             saveTasks(storage, tasks, parser, new Ui());
             return "Understood. Your task has been added:\n  " + task;
         } catch (InvalidCommandException | MissingFieldException e) {
             return e.getMessage();
         }
+    }
+
+    /** Formats the warning and confirmation prompt for event conflicts. */
+    private static String formatConflictWarning(List<TaskList.EventConflict> conflicts) {
+        StringBuilder response = new StringBuilder("This event clashes with:");
+        for (TaskList.EventConflict conflict : conflicts) {
+            response.append("\n")
+                    .append(conflict.taskNumber()).append(". ")
+                    .append(conflict.description()).append(" (")
+                    .append(conflict.overlapStart().format(CONFLICT_DATE_FORMAT)).append(" to ")
+                    .append(conflict.overlapEnd().format(CONFLICT_DATE_FORMAT)).append(")");
+        }
+        return response.append("\nAdd it anyway? Enter yes or no.").toString();
     }
 
     /** Saves tasks and reports file errors through the UI. */
