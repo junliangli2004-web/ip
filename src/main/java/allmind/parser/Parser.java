@@ -10,38 +10,46 @@ import allmind.model.ToDo;
 
 /** Converts user commands that create tasks into task objects. */
 public class Parser {
+    private static final String TODO_PREFIX = "todo ";
+    private static final String DEADLINE_PREFIX = "deadline ";
+    private static final String EVENT_PREFIX = "event ";
+    private static final String BY_SEPARATOR = " /by ";
+    private static final String FROM_SEPARATOR = " /from ";
+    private static final String TO_SEPARATOR = " /to ";
+
     /** Creates the task described by a {@code todo}, {@code deadline}, or {@code event} command. */
     public Task parseTask(String command) throws InvalidCommandException, MissingFieldException {
-        if (command.startsWith("todo ")) {
-            String description = command.substring("todo ".length()).trim();
+        if (command.startsWith(TODO_PREFIX)) {
+            String description = command.substring(TODO_PREFIX.length()).trim();
             if (description.isEmpty()) {
                 throw new MissingFieldException("A todo task needs a description.");
             }
             return new ToDo(description);
         }
-        if (command.startsWith("deadline ")) {
-            String details = command.substring("deadline ".length()).trim();
-            int byIndex = details.indexOf(" /by ");
-            if (byIndex <= 0 || byIndex + 5 >= details.length()) {
+        if (command.startsWith(DEADLINE_PREFIX)) {
+            String details = command.substring(DEADLINE_PREFIX.length()).trim();
+            int byIndex = details.indexOf(BY_SEPARATOR);
+            if (byIndex <= 0 || byIndex + BY_SEPARATOR.length() >= details.length()) {
                 throw new MissingFieldException("A deadline needs a description and a /by date.");
             }
             String description = details.substring(0, byIndex).trim();
-            String by = details.substring(byIndex + 5).trim();
+            String by = details.substring(byIndex + BY_SEPARATOR.length()).trim();
             if (description.isEmpty() || by.isEmpty()) {
                 throw new MissingFieldException("A deadline needs a description and a /by date.");
             }
             return new Deadline(description, parseDate(by));
         }
-        if (command.startsWith("event ")) {
-            String details = command.substring("event ".length()).trim();
-            int fromIndex = details.indexOf(" /from ");
-            int toIndex = details.indexOf(" /to ", fromIndex + 6);
-            if (fromIndex <= 0 || toIndex <= fromIndex + 6 || toIndex + 5 >= details.length()) {
+        if (command.startsWith(EVENT_PREFIX)) {
+            String details = command.substring(EVENT_PREFIX.length()).trim();
+            int fromIndex = details.indexOf(FROM_SEPARATOR);
+            int toIndex = details.indexOf(TO_SEPARATOR, fromIndex + FROM_SEPARATOR.length());
+            if (fromIndex <= 0 || toIndex <= fromIndex + FROM_SEPARATOR.length()
+                    || toIndex + TO_SEPARATOR.length() >= details.length()) {
                 throw new MissingFieldException("An event needs a description, /from date, and /to date.");
             }
             String description = details.substring(0, fromIndex).trim();
-            String from = details.substring(fromIndex + 6, toIndex).trim();
-            String to = details.substring(toIndex + 5).trim();
+            String from = details.substring(fromIndex + FROM_SEPARATOR.length(), toIndex).trim();
+            String to = details.substring(toIndex + TO_SEPARATOR.length()).trim();
             if (description.isEmpty() || from.isEmpty() || to.isEmpty()) {
                 throw new MissingFieldException("An event needs a description, /from date, and /to date.");
             }
