@@ -21,6 +21,8 @@
 .label {
     background:white;
     -fx-background-color: background;
+    -fx-font-family: "Verdana";
+    -fx-font-size: 18px;
     -fx-border-color: #d55e00 #009e73 #cc79a7 #0072b2;
     -fx-border-width: 2px;
     -fx-background-radius: 1em 1em 0 1em;
