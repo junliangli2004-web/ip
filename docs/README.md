@@ -117,4 +117,5 @@ Deletes task 2 from the list.
 ## Acknowledgements
 
 ChatGPT and Codex was used to refactor and code in this project.
-
+Emblem_ACVI_ALLMIND.png taken from https://armoredcore.fandom.com/wiki/ALLMIND?file=Emblem_ACVI_ALLMIND.png
+Sample_User_Icon.png taken from https://commons.wikimedia.org/wiki/File:Sample_User_Icon.png
